@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+
+		<!-- grant all privileges on icdc.* to 'root'@127.0.0.1 identified by '' -->
+<!-- 		<property name="hibernate.connection.username">root</property> -->
+<!-- 		<property name="hibernate.connection.password"></property> -->
+<!-- 		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property> -->
+<!-- 		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/icdc</property> -->
+<!-- 		<property name="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</property> -->
+
+		<!-- <property name="hibernate.connection.url">jdbc:hsqldb:hsql://localhost</property> -->
+		<!-- <property name="hibernate.connection.url">jdbc:hsqldb:mem:mymemdb</property> -->
+
+		<property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
+		<property name="hibernate.connection.url">jdbc:hsqldb:file:src/db/icdc;shutdown=true</property>
+		<property name="hibernate.connection.username">sa</property>
+		<property name="hibernate.connection.password"></property>
+		<property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+
+		<property name="hibernate.hbm2ddl.auto">update</property>
+		<property name="hibernate.jdbc.batch_size">100</property>
+		<property name="hibernate.show_sql">false</property>
+		<property name="hibernate.format_sql">true</property>
+
+		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<property name="hibernate.c3p0.acquire_increment">1</property>
+		<property name="hibernate.c3p0.idle_test_period">100</property> <!-- seconds -->
+		<property name="hibernate.c3p0.max_size">100</property>
+		<property name="hibernate.c3p0.max_statements">0</property>
+		<property name="hibernate.c3p0.min_size">10</property>
+		<property name="hibernate.c3p0.timeout">100</property>
+	</session-factory>
+</hibernate-configuration>
