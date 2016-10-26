@@ -2,6 +2,8 @@ package br.usp.ime.icdc.run;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -10,6 +12,7 @@ import br.usp.ime.icdc.Configuration.Chunkers;
 import br.usp.ime.icdc.Configuration.Classifiers;
 import br.usp.ime.icdc.Configuration.Criteria;
 import br.usp.ime.icdc.Configuration.MetastasisStatus;
+import br.usp.ime.icdc.Configuration.Sections;
 import br.usp.ime.icdc.Configuration.SentenceDetectors;
 import br.usp.ime.icdc.Configuration.SmoothingTechniques;
 import br.usp.ime.icdc.Configuration.Sources;
@@ -26,7 +29,11 @@ public class ClassifierFacade {
 	private static final Logger LOG = Logger.getLogger(CipeClassifier.class);
 
 	public static void main(String[] args) throws Exception {
-		Constants.CONFIG = new Configuration(Criteria.MANY_REPORT_ONE_REGISTRY,
+		Set<Sections> sections = new HashSet<Sections>();
+		sections.add(Sections.MACROSCOPY);
+		
+		// FIXME do we really need all the configs just to run?
+		Constants.CONFIG = new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY,
 				Classifiers.BAYES, SmoothingTechniques.ADD_ONE, Sources.ALL,
 				false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
 				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1,

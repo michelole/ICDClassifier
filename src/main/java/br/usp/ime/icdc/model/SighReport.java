@@ -23,6 +23,7 @@ import org.hibernate.annotations.Index;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import br.usp.ime.icdc.Configuration;
 import br.usp.ime.icdc.Constants;
 import br.usp.ime.icdc.dao.DAOFactory;
 import br.usp.ime.icdc.dao.PatientDAO;
@@ -60,8 +61,8 @@ public class SighReport implements Report {
 	public SighReport() {
 	}
 
-	public SighReport(String internalId, Calendar creationDate,
-			String macroscopy, String microscopy, String conclusion) {
+	public SighReport(String internalId, Calendar creationDate, String macroscopy, String microscopy,
+			String conclusion) {
 		this.internalId = internalId;
 		this.creationDate = creationDate;
 		this.macroscopy = macroscopy;
@@ -82,19 +83,30 @@ public class SighReport implements Report {
 	}
 
 	public String[] getTexts() {
-		return new String[]{macroscopy, microscopy, conclusion};
+		return new String[] { macroscopy, microscopy, conclusion };
+	}
+
+	public Map<Configuration.Sections, String> getZonedTexts() {
+		Map<Configuration.Sections, String> ret = new HashMap<Configuration.Sections, String>();
+		// TODO might be null
+		if (!macroscopy.isEmpty())
+			ret.put(Configuration.Sections.MACROSCOPY, macroscopy);
+		if (!microscopy.isEmpty())
+			ret.put(Configuration.Sections.MICROSCOPY, microscopy);
+		if (!conclusion.isEmpty())
+			ret.put(Configuration.Sections.CONCLUSION, conclusion);
+		return ret;
 	}
 
 	public String getText() {
-		return macroscopy +  System.getProperty("line.separator") + microscopy + System.getProperty("line.separator") + conclusion;
+		return macroscopy + System.getProperty("line.separator") + microscopy + System.getProperty("line.separator")
+				+ conclusion;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "SighReport [internalId=" + internalId + ", creationDate="
-				+ creationDate + ", macroscopy=" + macroscopy + ", microscopy="
-				+ microscopy + ", conclusion=" + conclusion + ", rgh=" + rgh
-				+ "]";
+		return "SighReport [internalId=" + internalId + ", creationDate=" + creationDate + ", macroscopy=" + macroscopy
+				+ ", microscopy=" + microscopy + ", conclusion=" + conclusion + ", rgh=" + rgh + "]";
 	}
 
 	public static void loadFromFile(File file) {
@@ -111,7 +123,7 @@ public class SighReport implements Report {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		LOG.debug("File loaded.");
 
 		if (d == null) {
@@ -121,8 +133,11 @@ public class SighReport implements Report {
 
 		DAOFactory factory = DAOFactory.getDAOFactory();
 
-		/* ************************************************************************** */
-		
+		/*
+		 * *********************************************************************
+		 * *****
+		 */
+
 		PatientDAO patientDao = factory.getPatientDAO();
 		patientDao.beginTransaction();
 
@@ -145,20 +160,16 @@ public class SighReport implements Report {
 			String conclusion = e.getChild("CONCLUSAO").getText();
 			Integer rgh = new Integer(e.getChild("RGH").getText());
 
-			// FIXME check if any non-empty text.
-			
 			Calendar creationDate = Calendar.getInstance();
 			creationDate.clear();
 			try {
-				creationDate.setTime(DATE_FORMAT.parse(e
-						.getChild("DATA_CRIADO").getText()));
+				creationDate.setTime(DATE_FORMAT.parse(e.getChild("DATA_CRIADO").getText()));
 			} catch (ParseException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
-			SighReport r = new SighReport(internallId, creationDate, macro,
-					micro, conclusion);
+			SighReport r = new SighReport(internallId, creationDate, macro, micro, conclusion);
 
 			Patient p = patientDao.locate(rgh);
 			if (p == null) {
@@ -180,13 +191,15 @@ public class SighReport implements Report {
 
 		int size = i;
 
-		/* ************************************************************************** */
+		/*
+		 * *********************************************************************
+		 * *****
+		 */
 
 		SighDAO sighDao = factory.getSighDAO();
 		sighDao.beginTransaction();
 
-		Iterator<Map.Entry<Integer, List<SighReport>>> mapIter = map.entrySet()
-				.iterator();
+		Iterator<Map.Entry<Integer, List<SighReport>>> mapIter = map.entrySet().iterator();
 
 		i = 1;
 		while (mapIter.hasNext()) {

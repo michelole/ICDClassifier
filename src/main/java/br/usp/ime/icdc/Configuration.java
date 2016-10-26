@@ -1,6 +1,13 @@
 package br.usp.ime.icdc;
 
+import java.util.Arrays;
+import java.util.Set;
+
 public class Configuration {
+	public enum Sections {
+		MACROSCOPY, MICROSCOPY, CYTOPATHOLOGY, LIQUID_CYTOPATHOLOGY, CONCLUSION, OTHERS;
+	}
+	
 	public enum Criteria {
 		ONE_REPORT_ONE_REGISTRY, MANY_REPORT_ONE_REGISTRY, MANY_REPORT_MANY_REGISTRY;
 	}
@@ -42,6 +49,7 @@ public class Configuration {
 		ALL, NONM1;
 	}
 
+	private Set<Sections> sections;
 	private Criteria criteria;
 	private int minReports = 1;
 	private Classifiers classifier;
@@ -56,12 +64,13 @@ public class Configuration {
 	private MetastasisStatus meta;
 	private int patientYear = -1;
 
-	public Configuration(Criteria criteria, Classifiers classifier,
+	public Configuration(Set<Sections> sections, Criteria criteria, Classifiers classifier,
 			SmoothingTechniques smoothing, Sources source, boolean stoplist,
 			SentenceDetectors sentenceDetector, Tokenizers tokenizer,
 			Stemmers stemmer, Chunkers chunker, Targets target, int minReports,
 			int year, MetastasisStatus meta) {
 		super();
+		this.sections = sections;
 		this.criteria = criteria;
 		if (criteria == Criteria.MANY_REPORT_ONE_REGISTRY)
 			this.minReports = minReports;
@@ -76,6 +85,10 @@ public class Configuration {
 		this.target = target;
 		this.patientYear = year;
 		this.meta = meta;
+	}
+	
+	public Set<Sections> getSections() {
+		return sections;
 	}
 
 	public Criteria getCriteria() {
@@ -131,13 +144,13 @@ public class Configuration {
 	}
 
 	public String getInstanceDependentStringRepresentation() {
-		return (criteria + "-" + minReports + "-" + source + "-" + sentenceDetector
+		return (Arrays.toString(sections.toArray()) + "-" + criteria + "-" + minReports + "-" + source + "-" + sentenceDetector
 				+ "-" + tokenizer + "Tokenizer-" + stemmer + "Stemmer-" + chunker + "Chunker-"
 				+ target + "-" + meta + "-" + patientYear).toLowerCase();
 	}
 
 	public String getStringRepresentation() {
-		return (criteria + "-" + minReports + "-" + classifier + "-"
+		return (Arrays.toString(sections.toArray()) + "-" + criteria + "-" + minReports + "-" + classifier + "-"
 				+ smoothing + "-" + Constants.ALPHA + "-" + source + "-"
 				+ stoplist + "-" + sentenceDetector + "-" + tokenizer + "-"
 				+ stemmer + "-" + chunker + "-" + target + "-" + meta + "-" + patientYear)

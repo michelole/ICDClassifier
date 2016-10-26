@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
@@ -62,7 +64,7 @@ public class CipeClassifier {
 	protected ExtendedEvaluation eval;
 
 	protected Stats stats = new Stats();
-	
+
 	// TODO DB to ARFF converter to be used on GUI
 
 	private static final Logger LOG = Logger.getLogger(CipeClassifier.class);
@@ -72,20 +74,20 @@ public class CipeClassifier {
 		loadInstances();
 		// buildClassifier();
 	}
-	
+
 	public void setWordsToKeep(int wordsToKeep) {
-		MultiFilter mf = (MultiFilter)((FilteredClassifier) model).getFilter();
+		MultiFilter mf = (MultiFilter) ((FilteredClassifier) model).getFilter();
 		Filter[] filters = mf.getFilters();
 		for (Filter f : filters)
 			if (f instanceof StringToWordVector)
 				((StringToWordVector) f).setWordsToKeep(wordsToKeep);
-		
+
 		// TODO Precisa setar novamente o filter?
 	}
 
 	protected void parseClassifier() {
 		String refDir = Constants.REF_DIR;
-		
+
 		LOG.debug("Config: " + Constants.CONFIG);
 		switch (Constants.CONFIG.getClassifier()) {
 		case NAIVE:
@@ -111,7 +113,7 @@ public class CipeClassifier {
 
 			NaiveBayesMultinomial nbm = parseSmoothing();
 			// nbm.setOptions(options);
-			
+
 			Remove remove = new Remove();
 			remove.setAttributeIndices("1,2,4,5");
 
@@ -149,8 +151,7 @@ public class CipeClassifier {
 			break;
 		}
 		default:
-			throw new IllegalArgumentException(Constants.CONFIG.getClassifier()
-					+ " is not implemented.");
+			throw new IllegalArgumentException(Constants.CONFIG.getClassifier() + " is not implemented.");
 		}
 	}
 
@@ -172,8 +173,7 @@ public class CipeClassifier {
 			// and printed by CoGrOO.
 			break;
 		default:
-			throw new IllegalArgumentException(Constants.CONFIG.getTokenizer()
-					+ " is not implemented.");
+			throw new IllegalArgumentException(Constants.CONFIG.getTokenizer() + " is not implemented.");
 		}
 		return filter;
 	}
@@ -185,34 +185,32 @@ public class CipeClassifier {
 		case PORTER: {
 			// Portuguese Snowball stemmer
 			PTStemmer stemmer = new PTStemmer();
-			stemmer.setStemmer(new SelectedTag(PTStemmer.STEMMER_PORTER,
-					PTStemmer.TAGS_STEMMERS));
+			stemmer.setStemmer(new SelectedTag(PTStemmer.STEMMER_PORTER, PTStemmer.TAGS_STEMMERS));
 			filter.setStemmer(stemmer);
 			break;
 		}
 		case ORENGO: {
 			PTStemmer stemmer = new PTStemmer();
-			stemmer.setStemmer(new SelectedTag(PTStemmer.STEMMER_ORENGO,
-					PTStemmer.TAGS_STEMMERS));
+			stemmer.setStemmer(new SelectedTag(PTStemmer.STEMMER_ORENGO, PTStemmer.TAGS_STEMMERS));
 			filter.setStemmer(stemmer);
 			break;
 		}
-		// TODO Savoy requires PTStemmer V2, which is not currently implemented on the Weka Wrapper.
+		// TODO Savoy requires PTStemmer V2, which is not currently implemented
+		// on the Weka Wrapper.
 		// We do have a prototype for it in V1 of the current project.
 		// (see https://github.com/fracpete/ptstemmer-weka-package/issues/1)
-//		case SAVOY: {
-//			PTStemmer stemmer = new PTStemmer();
-//			stemmer.setStemmer(new SelectedTag(PTStemmer.STEMMER_SAVOY,
-//					PTStemmer.TAGS_STEMMERS));
-//			filter.setStemmer(stemmer);
-//			break;
-//		}
+		// case SAVOY: {
+		// PTStemmer stemmer = new PTStemmer();
+		// stemmer.setStemmer(new SelectedTag(PTStemmer.STEMMER_SAVOY,
+		// PTStemmer.TAGS_STEMMERS));
+		// filter.setStemmer(stemmer);
+		// break;
+		// }
 		case COGROO:
 			// CoGrOO is implemented during import phase.
 			break;
 		default:
-			throw new IllegalArgumentException(Constants.CONFIG.getStemmer()
-					+ " is not implemented.");
+			throw new IllegalArgumentException(Constants.CONFIG.getStemmer() + " is not implemented.");
 		}
 		return filter;
 	}
@@ -231,8 +229,7 @@ public class CipeClassifier {
 			nbm = new GoodTuringNaiveBayesMultinomial();
 			break;
 		default:
-			throw new IllegalArgumentException(Constants.CONFIG.getSmoothing()
-					+ " is not implemented.");
+			throw new IllegalArgumentException(Constants.CONFIG.getSmoothing() + " is not implemented.");
 		}
 		// NaiveBayes nbm = new NaiveBayes();
 		return nbm;
@@ -279,8 +276,7 @@ public class CipeClassifier {
 	}
 
 	private void loadInstances() {
-		String filename = Constants.CONFIG
-				.getInstanceDependentStringRepresentation() + ".bin";
+		String filename = Constants.CONFIG.getInstanceDependentStringRepresentation() + ".bin";
 		File file = new File(filename);
 		try {
 			LOG.debug(file.getCanonicalFile());
@@ -312,8 +308,7 @@ public class CipeClassifier {
 
 		LOG.debug("Will generate classes.");
 		FastVector nominalCids = new FastVector();
-		List<Classifiable> icds = DAOFactory.getDAOFactory().getIcdClassDAO()
-				.list();
+		List<Classifiable> icds = DAOFactory.getDAOFactory().getIcdClassDAO().list();
 		Iterator<Classifiable> icdIter = icds.iterator();
 		while (icdIter.hasNext()) {
 			Classifiable c = icdIter.next();
@@ -339,8 +334,7 @@ public class CipeClassifier {
 				|| Constants.CONFIG.getChunker() == Configuration.Chunkers.COGROO) {
 			ComponentFactory factory = null;
 			try {
-				factory = ComponentFactory.create(new FileInputStream(
-						"src/main/resources/models.xml"));
+				factory = ComponentFactory.create(new FileInputStream("src/main/resources/models.xml"));
 				cogroo = factory.createPipe();
 				document = new DocumentImpl();
 			} catch (FileNotFoundException e) {
@@ -368,10 +362,11 @@ public class CipeClassifier {
 
 		Instance inst;
 
-		String[] sections;
+		// String[] sections;
+		Map<Configuration.Sections, String> sections;
 
 		int i = 0;
-		final int total = 19560;	// TODO remove hardcoded value
+		final int total = 19560; // TODO remove hardcoded value
 		long start = System.currentTimeMillis();
 		while (iter.hasNext()) {
 			i++;
@@ -379,8 +374,7 @@ public class CipeClassifier {
 				long now = System.currentTimeMillis();
 				double milisecondsPerEntry = (now - start) / (double) i;
 				int remain = (int) ((milisecondsPerEntry * (total - i)) / (60 * 1000));
-				LOG.trace(i + "/" + total + " (" + 100 * i / total + "%) "
-						+ remain + " minutes remaining");
+				LOG.trace(i + "/" + total + " (" + 100 * i / total + "%) " + remain + " minutes remaining");
 			}
 
 			p = (Patient) iter.next();
@@ -391,16 +385,21 @@ public class CipeClassifier {
 
 			texts = new ArrayList<String>();
 			for (int j = 0; j < numDocs; j++) {
-				sections = list.get(j).getTexts();
-				for (int k = 0; k < sections.length; k++) {
-					// TODO remove if checked at database population. how? will it exclude?
-					if (sections[k].length() > 0)
-						texts.add(sections[k]);
+				// sections = list.get(j).getTexts();
+				sections = list.get(j).getZonedTexts();
+
+				for (Map.Entry<Configuration.Sections, String> entry : sections.entrySet()) {
+					// Zone selection
+					if (Constants.CONFIG.getSections().contains(entry.getKey())) {
+						texts.add(entry.getValue());
+					}
 				}
 			}
 			// We didn't find any valid text.
-			if (texts.isEmpty())
+			if (texts.isEmpty()) {
+				LOG.debug("Found empty texts array for RGH: " + p.getRgh());
 				continue;
+			}
 
 			textsArray = new String[texts.size()];
 			textsArray = texts.toArray(textsArray);
@@ -448,8 +447,7 @@ public class CipeClassifier {
 								stats.incNumTokens();
 								if (Constants.CONFIG.getStemmer() == Configuration.Stemmers.COGROO) {
 									lemmas = token.getLemmas();
-									s = lemmas.length > 0 ? lemmas[0] : token
-											.getLexeme();
+									s = lemmas.length > 0 ? lemmas[0] : token.getLexeme();
 								} else
 									s = token.getLexeme();
 								sb.append(prefix);
@@ -465,8 +463,7 @@ public class CipeClassifier {
 							stats.incNumTokens();
 							if (Constants.CONFIG.getStemmer() == Configuration.Stemmers.COGROO) {
 								lemmas = token.getLemmas();
-								s = lemmas.length > 0 ? lemmas[0] : token
-										.getLexeme();
+								s = lemmas.length > 0 ? lemmas[0] : token.getLexeme();
 							} else
 								s = token.getLexeme();
 							sb.append(s);
@@ -536,8 +533,7 @@ public class CipeClassifier {
 			eval.crossValidateModel(model, dataset, 10, new Random(42));
 			long end = System.currentTimeMillis();
 
-			LOG.info("Cross-validate in " + ((end - start) / 1000)
-					+ " seconds.");
+			LOG.info("Cross-validate in " + ((end - start) / 1000) + " seconds.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -610,16 +606,14 @@ public class CipeClassifier {
 		try {
 			model.buildClassifier(trainSet);
 
-			Instances filteredTestSet = Filter.useFilter(testSet,
-					((FilteredClassifier) model).getFilter());
+			Instances filteredTestSet = Filter.useFilter(testSet, ((FilteredClassifier) model).getFilter());
 
 			Instance original = null;
 			Instance filtered = null;
 
 			CSVWriter writer = new CSVWriter(new FileWriter(file), ';');
 
-			String[] header = { "raw", "filtered", "correct", "decided", "pos",
-					"rgh", "year", "m", "ec" };
+			String[] header = { "raw", "filtered", "correct", "decided", "pos", "rgh", "year", "m", "ec" };
 			writer.writeNext(header);
 
 			for (int i = 0; i < testSet.numInstances(); i++) {
@@ -649,8 +643,8 @@ public class CipeClassifier {
 				String m = original.toString(3);
 				String ec = original.toString(4);
 
-				String[] entries = { rawText, filteredText, correctCode,
-						decidedCode, String.valueOf(pos), rgh, year, m, ec };
+				String[] entries = { rawText, filteredText, correctCode, decidedCode, String.valueOf(pos), rgh, year, m,
+						ec };
 				writer.writeNext(entries);
 			}
 
@@ -708,14 +702,13 @@ public class CipeClassifier {
 		// classifyInsts.instance(i).setClassValue(cls);
 		// }
 		// System.out.println(classifyInsts);
-		
+
 		final int numAttributes = 6;
 		FastVector attributes = new FastVector(numAttributes);
 
 		LOG.debug("Will generate classes.");
 		FastVector nominalCids = new FastVector();
-		List<Classifiable> icds = DAOFactory.getDAOFactory().getIcdClassDAO()
-				.list();
+		List<Classifiable> icds = DAOFactory.getDAOFactory().getIcdClassDAO().list();
 		Iterator<Classifiable> icdIter = icds.iterator();
 		while (icdIter.hasNext()) {
 			Classifiable c = icdIter.next();
@@ -728,37 +721,37 @@ public class CipeClassifier {
 		attributes.addElement(new Attribute("m", (FastVector) null));
 		attributes.addElement(new Attribute("ec", (FastVector) null));
 		attributes.addElement(new Attribute("code", nominalCids));
-		
-		// XXX Weka BUG. attributes index is incorrectly initialized inside the Instances constructor (reference updated). 
+
+		// XXX Weka BUG. attributes index is incorrectly initialized inside the
+		// Instances constructor (reference updated).
 		Instances classifyInsts = new Instances("CID", attributes, 1);
 
 		Instance inst = new Instance(numAttributes);
-		//inst.setValue((Attribute) attributes.elementAt(0), 1);
-		//inst.setValue((Attribute) attributes.elementAt(1), 1);
+		// inst.setValue((Attribute) attributes.elementAt(0), 1);
+		// inst.setValue((Attribute) attributes.elementAt(1), 1);
 		inst.setValue((Attribute) attributes.elementAt(2), text);
-		//inst.setValue((Attribute) attributes.elementAt(3), 1);
-		//inst.setValue((Attribute) attributes.elementAt(4), 1);
-		//inst.setValue((Attribute) attributes.elementAt(5), "");
-		
-		
-		//inst.setValue(2, text);
-		
+		// inst.setValue((Attribute) attributes.elementAt(3), 1);
+		// inst.setValue((Attribute) attributes.elementAt(4), 1);
+		// inst.setValue((Attribute) attributes.elementAt(5), "");
+
+		// inst.setValue(2, text);
+
 		classifyInsts.add(inst);
-		
+
 		classifyInsts.setClassIndex(numAttributes - 1);
 
 		double cls = 0;
 		try {
-			//classifyInsts.instance(0).setClassMissing();
+			// classifyInsts.instance(0).setClassMissing();
 			cls = model.classifyInstance(classifyInsts.instance(0));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		classifyInsts.instance(0).setClassValue(cls);
 		String ret = classifyInsts.instance(0).classAttribute().value((int) cls);
-		
+
 		return ret;
 	}
 
