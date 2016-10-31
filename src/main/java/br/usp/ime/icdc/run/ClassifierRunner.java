@@ -53,23 +53,18 @@ public class ClassifierRunner {
 
 		Set<Sections> sections = new HashSet<Sections>();
 		sections.add(Sections.MACROSCOPY);
-		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
-				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
-				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
-
-		sections = new HashSet<Sections>();
 		sections.add(Sections.MICROSCOPY);
-		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
-				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
-				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
-
-		sections = new HashSet<Sections>();
+		sections.add(Sections.CYTOPATHOLOGY);
 		sections.add(Sections.OTHERS);
+		sections.add(Sections.CONCLUSION);
+		sections.add(Sections.LIQUID_CYTOPATHOLOGY);
 		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
 				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
 				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
 
 		sections = new HashSet<Sections>();
+		sections.add(Sections.MACROSCOPY);
+		sections.add(Sections.MICROSCOPY);
 		sections.add(Sections.CONCLUSION);
 		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
 				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
@@ -83,11 +78,12 @@ public class ClassifierRunner {
 //				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
 //				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
 		
-		sections = new HashSet<Sections>();
-		sections.add(Sections.LIQUID_CYTOPATHOLOGY);
-		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
-				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
-				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
+		// FIXME java.lang.IllegalArgumentException: Can't have more folds than instances!
+//		sections = new HashSet<Sections>();
+//		sections.add(Sections.LIQUID_CYTOPATHOLOGY);
+//		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
+//				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
+//				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
 
 		// for (Targets t : targets)
 		// for (int i = 1; i <= 30; i++)
