@@ -54,6 +54,7 @@ public class Configuration {
 	private int minReports = 1;
 	private Classifiers classifier;
 	private SmoothingTechniques smoothing;
+	private int svmCostParameter = 1;
 	private Sources source;
 	private boolean stoplist;
 	private SentenceDetectors sentenceDetector;
@@ -65,7 +66,7 @@ public class Configuration {
 	private int patientYear = -1;
 
 	public Configuration(Set<Sections> sections, Criteria criteria, Classifiers classifier,
-			SmoothingTechniques smoothing, Sources source, boolean stoplist,
+			SmoothingTechniques smoothing, int svmCParameter, Sources source, boolean stoplist,
 			SentenceDetectors sentenceDetector, Tokenizers tokenizer,
 			Stemmers stemmer, Chunkers chunker, Targets target, int minReports,
 			int year, MetastasisStatus meta) {
@@ -76,6 +77,7 @@ public class Configuration {
 			this.minReports = minReports;
 		this.classifier = classifier;
 		this.smoothing = smoothing;
+		this.svmCostParameter = svmCParameter;
 		this.source = source;
 		this.stoplist = stoplist;
 		this.sentenceDetector = sentenceDetector;
@@ -105,6 +107,10 @@ public class Configuration {
 
 	public SmoothingTechniques getSmoothing() {
 		return smoothing;
+	}
+	
+	public int getSvmCostParameter() {
+		return svmCostParameter;
 	}
 
 	public Sources getSource() {

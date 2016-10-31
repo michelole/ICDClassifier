@@ -178,6 +178,8 @@ public class CipeClassifier {
 			// 3 = sigmoid: tanh(gamma*u'*v + coef0)
 			// Linear kernel is commonly recommended for text classification
 			svm.setKernelType(new SelectedTag(0, LibSVM.TAGS_KERNELTYPE));
+			
+			svm.setCost(Constants.CONFIG.getSvmCostParameter());
 
 			Remove remove = new Remove();
 			remove.setAttributeIndices("1,2,4,5");
