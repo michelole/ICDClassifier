@@ -7,13 +7,17 @@ public class Configuration {
 	public enum Sections {
 		MACROSCOPY, MICROSCOPY, CYTOPATHOLOGY, LIQUID_CYTOPATHOLOGY, CONCLUSION, OTHERS;
 	}
-	
+
 	public enum Criteria {
 		ONE_REPORT_ONE_REGISTRY, MANY_REPORT_ONE_REGISTRY, MANY_REPORT_MANY_REGISTRY;
 	}
 
 	public enum Classifiers {
 		NAIVE, BAYES, BAYES_NET, BERNOULLI, SVM;
+	}
+
+	public enum WeightingSchemes {
+		TF, IDF, TFIDF;
 	}
 
 	public enum SmoothingTechniques {
@@ -53,6 +57,7 @@ public class Configuration {
 	private Criteria criteria;
 	private int minReports = 1;
 	private Classifiers classifier;
+	private WeightingSchemes weightScheme;
 	private SmoothingTechniques smoothing;
 	private int svmCostParameter = 1;
 	private Sources source;
@@ -66,16 +71,16 @@ public class Configuration {
 	private int patientYear = -1;
 
 	public Configuration(Set<Sections> sections, Criteria criteria, Classifiers classifier,
-			SmoothingTechniques smoothing, int svmCParameter, Sources source, boolean stoplist,
-			SentenceDetectors sentenceDetector, Tokenizers tokenizer,
-			Stemmers stemmer, Chunkers chunker, Targets target, int minReports,
-			int year, MetastasisStatus meta) {
+			WeightingSchemes weightScheme, SmoothingTechniques smoothing, int svmCParameter, Sources source,
+			boolean stoplist, SentenceDetectors sentenceDetector, Tokenizers tokenizer, Stemmers stemmer,
+			Chunkers chunker, Targets target, int minReports, int year, MetastasisStatus meta) {
 		super();
 		this.sections = sections;
 		this.criteria = criteria;
 		if (criteria == Criteria.MANY_REPORT_ONE_REGISTRY)
 			this.minReports = minReports;
 		this.classifier = classifier;
+		this.weightScheme = weightScheme;
 		this.smoothing = smoothing;
 		this.svmCostParameter = svmCParameter;
 		this.source = source;
@@ -88,7 +93,7 @@ public class Configuration {
 		this.patientYear = year;
 		this.meta = meta;
 	}
-	
+
 	public Set<Sections> getSections() {
 		return sections;
 	}
@@ -105,10 +110,14 @@ public class Configuration {
 		return classifier;
 	}
 
+	public WeightingSchemes getWeightScheme() {
+		return weightScheme;
+	}
+
 	public SmoothingTechniques getSmoothing() {
 		return smoothing;
 	}
-	
+
 	public int getSvmCostParameter() {
 		return svmCostParameter;
 	}
@@ -150,17 +159,16 @@ public class Configuration {
 	}
 
 	public String getInstanceDependentStringRepresentation() {
-		return (Arrays.toString(sections.toArray()) + "-" + criteria + "-" + minReports + "-" + source + "-" + sentenceDetector
-				+ "-" + tokenizer + "Tokenizer-" + stemmer + "Stemmer-" + chunker + "Chunker-"
+		return (Arrays.toString(sections.toArray()) + "-" + criteria + "-" + minReports + "-" + source + "-"
+				+ sentenceDetector + "-" + tokenizer + "Tokenizer-" + stemmer + "Stemmer-" + chunker + "Chunker-"
 				+ target + "-" + meta + "-" + patientYear).toLowerCase();
 	}
 
 	public String getStringRepresentation() {
 		return (Arrays.toString(sections.toArray()) + "-" + criteria + "-" + minReports + "-" + classifier + "-"
-				+ smoothing + "-" + svmCostParameter + "-" + Constants.ALPHA + "-" + source + "-"
-				+ stoplist + "-" + sentenceDetector + "-" + tokenizer + "-"
-				+ stemmer + "-" + chunker + "-" + target + "-" + meta + "-" + patientYear)
-				.toLowerCase();
+				+ weightScheme + "-" + smoothing + "-" + svmCostParameter + "-" + Constants.ALPHA + "-" + source + "-"
+				+ stoplist + "-" + sentenceDetector + "-" + tokenizer + "-" + stemmer + "-" + chunker + "-" + target
+				+ "-" + meta + "-" + patientYear).toLowerCase();
 	}
 
 }

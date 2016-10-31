@@ -110,6 +110,20 @@ public class CipeClassifier {
 
 			f.setUseStoplist(Constants.CONFIG.getStoplist()); // Stopwords!
 			f.setWordsToKeep(5000);
+			
+			switch (Constants.CONFIG.getWeightScheme()) {
+			case TF:
+				f.setTFTransform(true);
+				break;
+			case IDF:
+				f.setIDFTransform(true);
+				break;
+			case TFIDF:
+				f.setTFTransform(true);
+				f.setIDFTransform(true);
+			default:
+				break;
+			}
 
 			NaiveBayesMultinomial nbm = parseSmoothing();
 			// nbm.setOptions(options);
@@ -167,6 +181,20 @@ public class CipeClassifier {
 
 			f.setUseStoplist(Constants.CONFIG.getStoplist()); // Stopwords!
 			f.setWordsToKeep(5000);
+			
+			switch (Constants.CONFIG.getWeightScheme()) {
+			case TF:
+				f.setTFTransform(true);
+				break;
+			case IDF:
+				f.setIDFTransform(true);
+				break;
+			case TFIDF:
+				f.setTFTransform(true);
+				f.setIDFTransform(true);
+			default:
+				break;
+			}
 
 			LibSVM svm = new LibSVM();
 			

@@ -21,6 +21,7 @@ import br.usp.ime.icdc.Configuration.Sources;
 import br.usp.ime.icdc.Configuration.Stemmers;
 import br.usp.ime.icdc.Configuration.Targets;
 import br.usp.ime.icdc.Configuration.Tokenizers;
+import br.usp.ime.icdc.Configuration.WeightingSchemes;
 import br.usp.ime.icdc.Constants;
 import br.usp.ime.icdc.logic.classifier.ExperimentalCipeClassifier;
 
@@ -58,11 +59,11 @@ public class ClassifierRunner {
 		sections.add(Sections.OTHERS);
 		sections.add(Sections.CONCLUSION);
 		sections.add(Sections.LIQUID_CYTOPATHOLOGY);
-		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.SVM,
+		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.SVM, WeightingSchemes.TFIDF,
 				SmoothingTechniques.ADD_ONE, 1, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
 				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
 
-		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
+		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES, WeightingSchemes.TFIDF,
 				SmoothingTechniques.ADD_ONE, 1, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
 				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
 
