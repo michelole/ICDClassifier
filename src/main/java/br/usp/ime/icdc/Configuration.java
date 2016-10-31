@@ -157,7 +157,7 @@ public class Configuration {
 
 	public String getStringRepresentation() {
 		return (Arrays.toString(sections.toArray()) + "-" + criteria + "-" + minReports + "-" + classifier + "-"
-				+ smoothing + "-" + Constants.ALPHA + "-" + source + "-"
+				+ smoothing + "-" + svmCostParameter + "-" + Constants.ALPHA + "-" + source + "-"
 				+ stoplist + "-" + sentenceDetector + "-" + tokenizer + "-"
 				+ stemmer + "-" + chunker + "-" + target + "-" + meta + "-" + patientYear)
 				.toLowerCase();
