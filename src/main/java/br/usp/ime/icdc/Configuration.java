@@ -13,7 +13,7 @@ public class Configuration {
 	}
 
 	public enum Classifiers {
-		NAIVE, BAYES, BAYES_NET, BERNOULLI;
+		NAIVE, BAYES, BAYES_NET, BERNOULLI, SVM;
 	}
 
 	public enum SmoothingTechniques {

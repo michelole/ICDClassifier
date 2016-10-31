@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +40,7 @@ import br.usp.ime.icdc.model.Report;
 import br.usp.ime.icdc.model.icd.Classifiable;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayesMultinomial;
+import weka.classifiers.functions.LibSVM;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -148,6 +148,46 @@ public class CipeClassifier {
 
 			((FilteredClassifier) model).setFilter(f);
 			((FilteredClassifier) model).setClassifier(nbm);
+			break;
+		}
+		case SVM: {
+			model = new FilteredClassifier();
+			StringToWordVector f = new StringToWordVector();
+			f.setAttributeIndices("first");
+			f.setDoNotOperateOnPerClassBasis(true);
+			f.setLowerCaseTokens(true);
+			f.setMinTermFreq(1);
+			f.setOutputWordCounts(true);
+			f = parseStemmer(f);
+			// TODO qual a ordem em relação ao stemmer? stopwords devem ser
+			// eliminadas ANTES!
+			f.setStopwords(new File(refDir + "stopwords-sigh.txt")); // Stopwords!
+
+			f = parseTokenizer(f);
+
+			f.setUseStoplist(Constants.CONFIG.getStoplist()); // Stopwords!
+			f.setWordsToKeep(5000);
+
+			LibSVM svm = new LibSVM();
+			
+			// -K <int>
+			// Set type of kernel function (default: 2)
+			// 0 = linear: u'*v
+			// 1 = polynomial: (gamma*u'*v + coef0)^degree
+			// 2 = radial basis function: exp(-gamma*|u-v|^2)
+			// 3 = sigmoid: tanh(gamma*u'*v + coef0)
+			// Linear kernel is commonly recommended for text classification
+			svm.setKernelType(new SelectedTag(0, LibSVM.TAGS_KERNELTYPE));
+
+			Remove remove = new Remove();
+			remove.setAttributeIndices("1,2,4,5");
+
+			MultiFilter mf = new MultiFilter();
+			mf.setFilters(new Filter[] { remove, f });
+
+			((FilteredClassifier) model).setFilter(mf);
+			((FilteredClassifier) model).setClassifier(svm);
+
 			break;
 		}
 		default:
