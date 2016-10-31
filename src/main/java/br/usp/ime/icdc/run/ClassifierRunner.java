@@ -59,28 +59,39 @@ public class ClassifierRunner {
 		sections.add(Sections.OTHERS);
 		sections.add(Sections.CONCLUSION);
 		sections.add(Sections.LIQUID_CYTOPATHOLOGY);
-		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.SVM, WeightingSchemes.TFIDF,
-				SmoothingTechniques.ADD_ONE, 1, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
-				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
 
-		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES, WeightingSchemes.TFIDF,
-				SmoothingTechniques.ADD_ONE, 1, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
-				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
+		double cost;
+		for (int i = -5; i <= 15; i += 2) {
+			cost = Math.pow(2, i);
+			configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.SVM,
+					WeightingSchemes.TFIDF, SmoothingTechniques.ADD_ONE, cost, Sources.ALL, false,
+					SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE, Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1,
+					-1, MetastasisStatus.NONM1));
 
-		// FIXME java.lang.IllegalArgumentException: Can't have more folds than instances!
+		}
+
+		// FIXME java.lang.IllegalArgumentException: Can't have more folds than
+		// instances!
 		// N = 3?
-//		sections = new HashSet<Sections>();
-//		sections.add(Sections.CYTOPATHOLOGY);
-//		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
-//				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
-//				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
-		
-		// FIXME java.lang.IllegalArgumentException: Can't have more folds than instances!
-//		sections = new HashSet<Sections>();
-//		sections.add(Sections.LIQUID_CYTOPATHOLOGY);
-//		configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
-//				SmoothingTechniques.ADD_ONE, Sources.ALL, false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
-//				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1, MetastasisStatus.NONM1));
+		// sections = new HashSet<Sections>();
+		// sections.add(Sections.CYTOPATHOLOGY);
+		// configs.add(new Configuration(sections,
+		// Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
+		// SmoothingTechniques.ADD_ONE, Sources.ALL, false,
+		// SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
+		// Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1,
+		// MetastasisStatus.NONM1));
+
+		// FIXME java.lang.IllegalArgumentException: Can't have more folds than
+		// instances!
+		// sections = new HashSet<Sections>();
+		// sections.add(Sections.LIQUID_CYTOPATHOLOGY);
+		// configs.add(new Configuration(sections,
+		// Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.BAYES,
+		// SmoothingTechniques.ADD_ONE, Sources.ALL, false,
+		// SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
+		// Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1,
+		// MetastasisStatus.NONM1));
 
 		// for (Targets t : targets)
 		// for (int i = 1; i <= 30; i++)
@@ -156,7 +167,7 @@ public class ClassifierRunner {
 
 			LOG.info("Cross validation");
 			c.crossValidate();
-			c.printStatsAsCsvLine(writer, config.getClassifier().toString());
+			c.printStatsAsCsvLine(writer, Double.toString(config.getSvmCostParameter()));
 
 			// LOG.info("Let's print stats to a file.");
 			// c.printStats();

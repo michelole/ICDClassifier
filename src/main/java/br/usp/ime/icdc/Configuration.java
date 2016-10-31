@@ -59,7 +59,7 @@ public class Configuration {
 	private Classifiers classifier;
 	private WeightingSchemes weightScheme;
 	private SmoothingTechniques smoothing;
-	private int svmCostParameter = 1;
+	private double svmCostParameter = 1;
 	private Sources source;
 	private boolean stoplist;
 	private SentenceDetectors sentenceDetector;
@@ -71,7 +71,7 @@ public class Configuration {
 	private int patientYear = -1;
 
 	public Configuration(Set<Sections> sections, Criteria criteria, Classifiers classifier,
-			WeightingSchemes weightScheme, SmoothingTechniques smoothing, int svmCParameter, Sources source,
+			WeightingSchemes weightScheme, SmoothingTechniques smoothing, double svmCParameter, Sources source,
 			boolean stoplist, SentenceDetectors sentenceDetector, Tokenizers tokenizer, Stemmers stemmer,
 			Chunkers chunker, Targets target, int minReports, int year, MetastasisStatus meta) {
 		super();
@@ -118,7 +118,7 @@ public class Configuration {
 		return smoothing;
 	}
 
-	public int getSvmCostParameter() {
+	public double getSvmCostParameter() {
 		return svmCostParameter;
 	}
 
