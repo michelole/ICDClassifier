@@ -22,7 +22,7 @@ public class ExperimentalCipeClassifier extends CipeClassifier {
 		CSVWriter writer = null;
 		try {
 			writer = new CSVWriter(new FileWriter(filename), ';');
-			String[] header = { "Var", "N", "P", "R", "F1", "F2", "A" };
+			String[] header = { "Var", "N", "A", "P", "R", "Macro-F1", "Micro-F1"};
 			writer.writeNext(header);
 			writer.flush();
 
@@ -111,13 +111,13 @@ public class ExperimentalCipeClassifier extends CipeClassifier {
 		int n = dataset.numInstances();
 		double p = eval.microAveragedPrecision();
 		double r = eval.microAveragedRecall();
-		double f1 = eval.microAveragedFMeasure(1);
-		double f2 = eval.microAveragedFMeasure(2);
+		double macroF1 = eval.macroAveragedFMeasure(1);
+		double microF1 = eval.microAveragedFMeasure(1);
 		double a = eval.accuracy();
 
-		String[] line = { id, String.valueOf(n), String.valueOf(p),
-				String.valueOf(r), String.valueOf(f1), String.valueOf(f2),
-				String.valueOf(a) };
+		String[] line = { id, String.valueOf(n), String.valueOf(a), String.valueOf(p),
+				String.valueOf(r), String.valueOf(macroF1), String.valueOf(microF1),
+				 };
 		writer.writeNext(line);
 		try {
 			writer.flush();
