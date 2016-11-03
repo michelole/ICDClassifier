@@ -62,6 +62,7 @@ public class Configuration {
 	private double svmCostParameter = 1;
 	private Sources source;
 	private boolean stoplist;
+	private int ngrams = 1;
 	private SentenceDetectors sentenceDetector;
 	private Tokenizers tokenizer;
 	private Stemmers stemmer;
@@ -72,7 +73,7 @@ public class Configuration {
 
 	public Configuration(Set<Sections> sections, Criteria criteria, Classifiers classifier,
 			WeightingSchemes weightScheme, SmoothingTechniques smoothing, double svmCParameter, Sources source,
-			boolean stoplist, SentenceDetectors sentenceDetector, Tokenizers tokenizer, Stemmers stemmer,
+			boolean stoplist, int ngrams, SentenceDetectors sentenceDetector, Tokenizers tokenizer, Stemmers stemmer,
 			Chunkers chunker, Targets target, int minReports, int year, MetastasisStatus meta) {
 		super();
 		this.sections = sections;
@@ -85,6 +86,7 @@ public class Configuration {
 		this.svmCostParameter = svmCParameter;
 		this.source = source;
 		this.stoplist = stoplist;
+		this.ngrams = ngrams;
 		this.sentenceDetector = sentenceDetector;
 		this.tokenizer = tokenizer;
 		this.stemmer = stemmer;
@@ -129,6 +131,10 @@ public class Configuration {
 	public boolean getStoplist() {
 		return stoplist;
 	}
+	
+	public int getNGrams() {
+		return ngrams;
+	}
 
 	public SentenceDetectors getSentenceDetector() {
 		return sentenceDetector;
@@ -167,7 +173,7 @@ public class Configuration {
 	public String getStringRepresentation() {
 		return (Arrays.toString(sections.toArray()) + "-" + criteria + "-" + minReports + "-" + classifier + "-"
 				+ weightScheme + "-" + smoothing + "-" + svmCostParameter + "-" + Constants.ALPHA + "-" + source + "-"
-				+ stoplist + "-" + sentenceDetector + "-" + tokenizer + "-" + stemmer + "-" + chunker + "-" + target
+				+ stoplist + "-" + ngrams + "-" + sentenceDetector + "-" + tokenizer + "-" + stemmer + "-" + chunker + "-" + target
 				+ "-" + meta + "-" + patientYear).toLowerCase();
 	}
 

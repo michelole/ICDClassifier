@@ -49,7 +49,7 @@ import weka.core.Instances;
 import weka.core.SelectedTag;
 import weka.core.stemmers.PTStemmer;
 import weka.core.tokenizers.AlphabeticTokenizer;
-import weka.core.tokenizers.WordTokenizer;
+import weka.core.tokenizers.NGramTokenizer;
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
 import weka.filters.unsupervised.attribute.Remove;
@@ -232,7 +232,9 @@ public class CipeClassifier {
 			filter.setTokenizer(new AlphabeticTokenizer());
 			break;
 		case WORD:
-			filter.setTokenizer(new WordTokenizer());
+			NGramTokenizer tokenizer = new NGramTokenizer();
+			tokenizer.setNGramMaxSize(Constants.CONFIG.getNGrams());
+			filter.setTokenizer(tokenizer);
 			break;
 		case OPENNLP:
 			// TODO use WordTokenizer with a specific delimiter set via options

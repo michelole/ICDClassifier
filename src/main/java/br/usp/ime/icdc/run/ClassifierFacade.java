@@ -36,7 +36,7 @@ public class ClassifierFacade {
 		// FIXME do we really need all the configs just to run?
 		Constants.CONFIG = new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY,
 				Classifiers.BAYES, WeightingSchemes.TFIDF, SmoothingTechniques.ADD_ONE, 1, Sources.ALL,
-				false, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
+				false, 1, SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE,
 				Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1, -1,
 				MetastasisStatus.NONM1);
 

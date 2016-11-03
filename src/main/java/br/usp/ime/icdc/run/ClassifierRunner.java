@@ -61,10 +61,10 @@ public class ClassifierRunner {
 		sections.add(Sections.LIQUID_CYTOPATHOLOGY);
 
 		double cost;
-		for (int i = -5; i <= 15; i += 2) {
+		for (int i = -11; i <= -3; i += 4) {
 			cost = Math.pow(2, i);
 			configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.SVM,
-					WeightingSchemes.TFIDF, SmoothingTechniques.ADD_ONE, cost, Sources.ALL, false,
+					WeightingSchemes.TFIDF, SmoothingTechniques.ADD_ONE, cost, Sources.ALL, false, 2,
 					SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE, Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1,
 					-1, MetastasisStatus.NONM1));
 
