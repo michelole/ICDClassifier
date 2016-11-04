@@ -59,7 +59,7 @@ public class ExperimentalCipeClassifier extends CipeClassifier {
 			test = new Instances(dataset, 0, max);
 			try {
 				e = new ExtendedEvaluation(test);
-				e.crossValidateModel(model, test, 10, rand);
+				e.crossValidateModel(classifier, test, 10, rand);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				continue;
@@ -220,11 +220,11 @@ public class ExperimentalCipeClassifier extends CipeClassifier {
 			out.println("Accuracy: " + eval.accuracy());
 			out.println("Number of classes: " + dataset.numClasses());
 			out.println("Number of attributes: " + dataset.numAttributes());
-			if (model instanceof FilteredClassifier) {
-				model.buildClassifier(dataset);
+			if (classifier instanceof FilteredClassifier) {
+				classifier.buildClassifier(dataset);
 				int att = Filter
 						.useFilter(dataset,
-								((FilteredClassifier) model).getFilter())
+								((FilteredClassifier) classifier).getFilter())
 						.stringFreeStructure().numAttributes();
 				out.println("Number of attributes after filter: " + att);
 			}

@@ -1,10 +1,13 @@
 package br.usp.ime.icdc.logic.classifier;
 
+import java.beans.PropertyDescriptor;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,6 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import javax.swing.DefaultListModel;
 
 import org.apache.log4j.Logger;
 import org.cogroo.analyzer.Analyzer;
@@ -29,6 +34,7 @@ import br.usp.ime.icdc.Configuration;
 import br.usp.ime.icdc.Constants;
 import br.usp.ime.icdc.dao.DAOFactory;
 import br.usp.ime.icdc.logic.evaluation.Stats;
+import br.usp.ime.icdc.logic.experiment.ExternalInstancesExperiment;
 import br.usp.ime.icdc.logic.weka.classifiers.AddAlphaNaiveBayesMultinomial;
 import br.usp.ime.icdc.logic.weka.classifiers.GoodTuringNaiveBayesMultinomial;
 import br.usp.ime.icdc.logic.weka.classifiers.NaiveClassifier;
@@ -46,10 +52,20 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Range;
 import weka.core.SelectedTag;
 import weka.core.stemmers.PTStemmer;
 import weka.core.tokenizers.AlphabeticTokenizer;
 import weka.core.tokenizers.NGramTokenizer;
+import weka.experiment.ClassifierSplitEvaluator;
+import weka.experiment.CrossValidationResultProducer;
+import weka.experiment.InstancesResultListener;
+import weka.experiment.PairedCorrectedTTester;
+import weka.experiment.PairedTTester;
+import weka.experiment.PropertyNode;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.experiment.SplitEvaluator;
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
 import weka.filters.unsupervised.attribute.Remove;
@@ -58,10 +74,13 @@ import weka.filters.unsupervised.attribute.StringToWordVector;
 public class CipeClassifier {
 
 	protected Instances dataset;
-	protected Classifier model;
+	protected Classifier classifier;
 
 	// TODO remove (as its dependent on dataset used to eval).
+	@Deprecated //use SplitEvaluator instead
 	protected ExtendedEvaluation eval;
+	
+	protected SplitEvaluator se;
 
 	protected Stats stats = new Stats();
 
@@ -76,7 +95,7 @@ public class CipeClassifier {
 	}
 
 	public void setWordsToKeep(int wordsToKeep) {
-		MultiFilter mf = (MultiFilter) ((FilteredClassifier) model).getFilter();
+		MultiFilter mf = (MultiFilter) ((FilteredClassifier) classifier).getFilter();
 		Filter[] filters = mf.getFilters();
 		for (Filter f : filters)
 			if (f instanceof StringToWordVector)
@@ -91,10 +110,10 @@ public class CipeClassifier {
 		LOG.debug("Config: " + Constants.CONFIG);
 		switch (Constants.CONFIG.getClassifier()) {
 		case NAIVE:
-			model = new NaiveClassifier();
+			classifier = new NaiveClassifier();
 			break;
 		case BAYES: {
-			model = new FilteredClassifier();
+			classifier = new FilteredClassifier();
 			StringToWordVector f = new StringToWordVector();
 			f.setAttributeIndices("first");
 			f.setDoNotOperateOnPerClassBasis(true);
@@ -134,13 +153,13 @@ public class CipeClassifier {
 			MultiFilter mf = new MultiFilter();
 			mf.setFilters(new Filter[] { remove, f });
 
-			((FilteredClassifier) model).setFilter(mf);
-			((FilteredClassifier) model).setClassifier(nbm);
+			((FilteredClassifier) classifier).setFilter(mf);
+			((FilteredClassifier) classifier).setClassifier(nbm);
 
 			break;
 		}
 		case BERNOULLI: {
-			model = new FilteredClassifier();
+			classifier = new FilteredClassifier();
 			StringToWordVector f = new StringToWordVector();
 			f.setAttributeIndices("first");
 			f.setDoNotOperateOnPerClassBasis(true);
@@ -160,12 +179,12 @@ public class CipeClassifier {
 
 			// nbm.setOptions(options);
 
-			((FilteredClassifier) model).setFilter(f);
-			((FilteredClassifier) model).setClassifier(nbm);
+			((FilteredClassifier) classifier).setFilter(f);
+			((FilteredClassifier) classifier).setClassifier(nbm);
 			break;
 		}
 		case SVM: {
-			model = new FilteredClassifier();
+			classifier = new FilteredClassifier();
 			StringToWordVector f = new StringToWordVector();
 			f.setAttributeIndices("first");
 			f.setDoNotOperateOnPerClassBasis(true);
@@ -215,8 +234,8 @@ public class CipeClassifier {
 			MultiFilter mf = new MultiFilter();
 			mf.setFilters(new Filter[] { remove, f });
 
-			((FilteredClassifier) model).setFilter(mf);
-			((FilteredClassifier) model).setClassifier(svm);
+			((FilteredClassifier) classifier).setFilter(mf);
+			((FilteredClassifier) classifier).setClassifier(svm);
 
 			break;
 		}
@@ -310,7 +329,7 @@ public class CipeClassifier {
 	public void buildClassifier() {
 		LOG.debug("Building classifier...");
 		try {
-			model.buildClassifier(dataset);
+			classifier.buildClassifier(dataset);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -599,11 +618,90 @@ public class CipeClassifier {
 	public void crossValidate() {
 		try {
 			LOG.debug("Will cross-validate.");
-			eval = new ExtendedEvaluation(dataset);
-
-			long start = System.currentTimeMillis();
-			eval.crossValidateModel(model, dataset, 10, new Random(42));
-			long end = System.currentTimeMillis();
+			
+			// 1. setup the experiment
+			ExternalInstancesExperiment exp = new ExternalInstancesExperiment();
+		    exp.setPropertyArray(new Classifier[0]);
+		    exp.setUsePropertyIterator(true);
+		    
+		    // classification
+			se = new ClassifierSplitEvaluator();
+			Classifier sec = ((ClassifierSplitEvaluator) se).getClassifier();
+			
+			// crossvalidation
+			CrossValidationResultProducer cvrp = new CrossValidationResultProducer();
+			cvrp.setNumFolds(2);	// FIXME
+		    cvrp.setSplitEvaluator(se);
+		    
+		    PropertyNode[] propertyPath = new PropertyNode[2];
+			propertyPath[0] = new PropertyNode(se,
+					new PropertyDescriptor("splitEvaluator", CrossValidationResultProducer.class),
+					CrossValidationResultProducer.class);
+			propertyPath[1] = new PropertyNode(sec, new PropertyDescriptor("classifier", se.getClass()), se.getClass());
+		    
+		    exp.setResultProducer(cvrp);
+		    exp.setPropertyPath(propertyPath);
+		    
+		    // runs
+		    exp.setRunLower(1);
+		    exp.setRunUpper(2);	// FIXME
+		    	
+		    // classifier
+		    exp.setPropertyArray(new Classifier[]{classifier});
+		    
+		    // datasets
+		    DefaultListModel model = new DefaultListModel();
+			model.addElement(new File(""));
+		    exp.setDatasets(model);
+		    	    
+		    // result
+		    InstancesResultListener irl = new InstancesResultListener();
+		    irl.setOutputFile(new File("result.arff"));
+		    exp.setResultListener(irl);
+		    
+		    // 2. run experiment
+		    LOG.info("Initializing...");
+		    exp.initialize();
+		    
+		    // TODO check if it works
+		    exp.setCurrentInstances(dataset);
+		    
+		    LOG.info("Running...");
+		    long start = System.currentTimeMillis();
+		    exp.runExperiment();
+		    long end = System.currentTimeMillis();
+		    
+		    LOG.info("Finishing...");
+		    exp.postProcess();
+		    
+		    // 3. calculate statistics and output them
+			LOG.info("Evaluating...");
+			PairedTTester tester = new PairedCorrectedTTester();
+			Instances result = new Instances(new BufferedReader(new FileReader(irl.getOutputFile())));
+			tester.setInstances(result);
+			tester.setSortColumn(-1);
+			tester.setRunColumn(result.attribute("Key_Run").index());
+			tester.setFoldColumn(result.attribute("Key_Fold").index());
+			tester.setResultsetKeyColumns(new Range("" + (result.attribute("Key_Dataset").index() + 1)));
+			tester.setDatasetKeyColumns(new Range("" + (result.attribute("Key_Scheme").index() + 1) + ","
+					+ (result.attribute("Key_Scheme_options").index() + 1) + ","
+					+ (result.attribute("Key_Scheme_version_ID").index() + 1)));
+			tester.setResultMatrix(new ResultMatrixPlainText());
+			tester.setDisplayedResultsets(null);
+			tester.setSignificanceLevel(0.05);
+			tester.setShowStdDevs(true);
+		    // fill result matrix (but discarding the output)
+		    tester.multiResultsetFull(0, result.attribute("Percent_correct").index());
+		    
+		    // output results for reach dataset
+		    LOG.info("\nResult:");
+		    ResultMatrix matrix = tester.getResultMatrix();
+		    for (int i = 0; i < matrix.getColCount(); i++) {
+		      System.out.println(matrix.getColName(i));
+		      System.out.println("    Perc. correct: " + matrix.getMean(i, 0));
+		      System.out.println("    StdDev: " + matrix.getStdDev(i, 0));
+		    }
+			
 
 			LOG.info("Cross-validate in " + ((end - start) / 1000) + " seconds.");
 		} catch (Exception e) {
@@ -619,7 +717,7 @@ public class CipeClassifier {
 	public void printClassifier(File file) {
 		LOG.debug("Will build classifier.");
 		try {
-			model.buildClassifier(dataset);
+			classifier.buildClassifier(dataset);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
@@ -628,7 +726,7 @@ public class CipeClassifier {
 		LOG.debug("Will write file");
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			bw.write(model.toString());
+			bw.write(classifier.toString());
 			bw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -654,9 +752,9 @@ public class CipeClassifier {
 
 			// TODO same dataset for training and test to estimate maximum
 			// (ICDC-3)
-			model.buildClassifier(trainSet);
+			classifier.buildClassifier(trainSet);
 			eval = new ExtendedEvaluation(trainSet);
-			eval.evaluateModel(model, testSet);
+			eval.evaluateModel(classifier, testSet);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -676,9 +774,9 @@ public class CipeClassifier {
 		Instances testSet = new Instances(dataset, trainSize, testSize);
 
 		try {
-			model.buildClassifier(trainSet);
+			classifier.buildClassifier(trainSet);
 
-			Instances filteredTestSet = Filter.useFilter(testSet, ((FilteredClassifier) model).getFilter());
+			Instances filteredTestSet = Filter.useFilter(testSet, ((FilteredClassifier) classifier).getFilter());
 
 			Instance original = null;
 			Instance filtered = null;
@@ -692,8 +790,8 @@ public class CipeClassifier {
 				original = testSet.instance(i);
 				filtered = filteredTestSet.instance(i);
 
-				double[] dist = model.distributionForInstance(original);
-				double cls = model.classifyInstance(original);
+				double[] dist = classifier.distributionForInstance(original);
+				double cls = classifier.classifyInstance(original);
 
 				int pos = getCorrectPosition(dist, original.classValue());
 				if (pos < threshold)
@@ -815,7 +913,7 @@ public class CipeClassifier {
 		double cls = 0;
 		try {
 			// classifyInsts.instance(0).setClassMissing();
-			cls = model.classifyInstance(classifyInsts.instance(0));
+			cls = classifier.classifyInstance(classifyInsts.instance(0));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
