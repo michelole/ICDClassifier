@@ -144,7 +144,7 @@ public class ExperimentalCipeClassifier extends CipeClassifier {
 	}
 
 	public void printStats() {
-		String filename = Constants.CONFIG.getStringRepresentation() + ".txt";
+		String filename = "stats-" + Constants.CONFIG.getStringRepresentation() + ".txt";
 		try {
 			printStats(new PrintWriter(filename));
 		} catch (FileNotFoundException e) {

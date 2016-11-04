@@ -50,7 +50,7 @@ public class ClassifierRunner {
 		for (int p : power) {
 			cost = Math.pow(2, p);
 			configs.add(new Configuration(sections, Criteria.MANY_REPORT_ONE_REGISTRY, Classifiers.SVM,
-					WeightingSchemes.TFIDF, SmoothingTechniques.ADD_ONE, cost, Sources.ALL, true, 2,
+					WeightingSchemes.TFIDF, SmoothingTechniques.ADD_ONE, cost, Sources.ALL, false, 1,
 					SentenceDetectors.NONE, Tokenizers.WORD, Stemmers.NONE, Chunkers.NONE, Targets.TOPOGRAPHY_GROUP, 1,
 					-1, MetastasisStatus.NONM1));
 
@@ -58,7 +58,7 @@ public class ClassifierRunner {
 
 		ExperimentalCipeClassifier c;
 
-		CSVWriter writer = ExperimentalCipeClassifier.getWriter(Constants.CONFIG.getStringRepresentation() + ".csv");
+		CSVWriter writer = ExperimentalCipeClassifier.getWriter("evaluation.csv");
 
 		for (Configuration config : configs) {
 			Constants.CONFIG = config;

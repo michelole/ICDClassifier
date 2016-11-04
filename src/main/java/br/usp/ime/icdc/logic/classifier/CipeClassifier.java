@@ -612,7 +612,7 @@ public class CipeClassifier {
 	}
 
 	public void printClassifier() {
-		String filename = Constants.CONFIG.getStringRepresentation() + ".arff";
+		String filename = "classifier-" + Constants.CONFIG.getStringRepresentation() + ".arff";
 		printClassifier(new File(filename));
 	}
 
