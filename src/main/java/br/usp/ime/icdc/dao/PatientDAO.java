@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import br.usp.ime.icdc.model.Patient;
@@ -32,6 +33,10 @@ public class PatientDAO {
 	public Patient locate(Integer rgh) {
 		return (Patient) this.session.createCriteria(Patient.class)
 				.add(Restrictions.eq("rgh", rgh)).uniqueResult();
+	}
+	
+	public Integer count() {
+		return (Integer) this.session.createCriteria(Patient.class).setProjection(Projections.rowCount()).uniqueResult();
 	}
 	
 	@SuppressWarnings("unchecked")
